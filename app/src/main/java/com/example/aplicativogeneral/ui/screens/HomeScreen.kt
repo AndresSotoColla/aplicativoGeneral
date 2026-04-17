@@ -116,7 +116,7 @@ fun MenuButton(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 24.dp),
-            verticalAlignment = Alignment.CenterHorizontally
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Surface(
                 modifier = Modifier.size(56.dp),
