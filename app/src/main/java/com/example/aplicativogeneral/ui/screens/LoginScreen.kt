@@ -129,12 +129,16 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
 
                                 withContext(Dispatchers.Main) {
                                     isLoading = false
-                                    if (responseText.contains("incorrecta", ignoreCase = true)) {
-                                        Toast.makeText(context, "Usuario o contraseña incorrecta", Toast.LENGTH_LONG).show()
-                                    } else if (responseText.contains("No tienes permitido acceso", ignoreCase = true)) {
-                                        Toast.makeText(context, "No tienes permitido acceso al aplicativo movil", Toast.LENGTH_LONG).show()
+                                    
+                                    val isError = responseCode !in 200..299 || responseText.contains("error", ignoreCase = true) || responseText.contains("incorrect", ignoreCase = true)
+                                    
+                                    if (isError) {
+                                        if (responseText.contains("No tienes permitido", ignoreCase = true)) {
+                                            Toast.makeText(context, "No tienes permitido acceso al aplicativo movil", Toast.LENGTH_LONG).show()
+                                        } else {
+                                            Toast.makeText(context, "Usuario o contraseña incorrectos", Toast.LENGTH_LONG).show()
+                                        }
                                     } else {
-                                        // Asumimos éxito si no retorna los mensajes de error
                                         onLoginSuccess()
                                     }
                                 }
