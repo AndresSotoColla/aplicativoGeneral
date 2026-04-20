@@ -24,15 +24,18 @@ import java.io.InputStreamReader
 import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
 import java.net.URL
+import android.content.Context
 
 @Composable
 fun LoginScreen(onLoginSuccess: () -> Unit) {
-    var username by remember { mutableStateOf("") }
+    val context = LocalContext.current
+    val sharedPreferences = remember { context.getSharedPreferences("LoginPrefs", Context.MODE_PRIVATE) }
+    val coroutineScope = rememberCoroutineScope()
+
+    var username by remember { mutableStateOf(sharedPreferences.getString("username", "") ?: "") }
     var password by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
-
-    val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
+    var rememberMe by remember { mutableStateOf(sharedPreferences.getBoolean("rememberMe", false)) }
 
     val gradientBrush = Brush.verticalGradient(
         colors = listOf(
@@ -89,7 +92,21 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                     singleLine = true
                 )
 
-                Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Checkbox(
+                        checked = rememberMe,
+                        onCheckedChange = { rememberMe = it },
+                        colors = CheckboxDefaults.colors(checkedColor = Color(0xFF2E7D32))
+                    )
+                    Text(text = "Recordar usuario", color = Color(0xFF1B5E20), fontSize = 14.sp)
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
 
                 Button(
                     onClick = {
@@ -139,6 +156,17 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                                             Toast.makeText(context, "Usuario o contraseña incorrectos", Toast.LENGTH_LONG).show()
                                         }
                                     } else {
+                                        if (rememberMe) {
+                                            sharedPreferences.edit()
+                                                .putString("username", username.trim())
+                                                .putBoolean("rememberMe", true)
+                                                .apply()
+                                        } else {
+                                            sharedPreferences.edit()
+                                                .remove("username")
+                                                .putBoolean("rememberMe", false)
+                                                .apply()
+                                        }
                                         onLoginSuccess()
                                     }
                                 }
